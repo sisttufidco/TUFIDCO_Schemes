@@ -1,0 +1,1514 @@
+{% extends 'admin/change_list.html' %}
+{% load i18n admin_urls static admin_list %}
+{% block content_title %}{% endblock %}
+{% block extrastyle %}
+  {{ block.super }}
+  {% load  static %}
+  <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
+  {% if cl.formset %}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+  {% endif %}
+  {% if cl.formset or action_form %}
+    <script src="{% url 'admin:jsi18n' %}"></script>
+  {% endif %}
+  {{ media.css }}
+  {% if not actions_on_top and not actions_on_bottom %}
+    <style>
+      #changelist table thead th:first-child {width: inherit}
+    </style>
+  {% endif %}
+  <style>
+      .object-tools a.addlink {
+          display: none;
+      }
+  </style>
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" >
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" type="text/css">
+{% endblock %}
+{% block result_list %}
+{% for group in request.user.groups.all %}
+  {% if group.name == 'Admin' or group.name == 'CMD_DGM' %}
+    <div id="carousel" class="carousel slide" data-ride="carousel">
+      <div class="carousel-inner carousel-t">
+        <div class="carousel-item active">
+          <div class="row row-card">
+            <p class="p-details">KNMT Project Details - Overall (2021-22)</p>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-blue">
+                <div class="inner">
+                  <p class="card-title">Total Projects</p>
+                  <h3 class="card-info"> {{ total_projects }} </h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-green">
+                <div class="inner">
+                  <p class="card-title">Total Cost</p>
+                  <h3 class="card-info">&#8377; {{ project_cost.project_cost }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-orange">
+                <div class="inner">
+                  <p class="card-title">KNMT Share</p>
+                  <h3 class="card-info">&#8377; {{ knmt.knmt_share }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-red">
+                <div class="inner">
+                  <p class="card-title">ULB Share</p>
+                  <h3 class="card-info">&#8377; {{ ulb_share.ulb_share }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="row row-card">
+            <p class="p-details">KNMT Project Details - Directorate of Municipalities (2021-22)</p>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-blue">
+                <div class="inner">
+                  <p class="card-title">Total Projects</p>
+                  <h3 class="card-info"> {{ dmp_total_projects }} </h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-green">
+                <div class="inner">
+                  <p class="card-title">Total Cost</p>
+                  <h3 class="card-info"> &#8377; {{ dmp_project_cost.dmp_project_cost }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-orange">
+                <div class="inner">
+                  <p class="card-title">KNMT Share</p>
+                  <h3 class="card-info">&#8377; {{ dmp_knmt.dmp_knmt }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-red">
+                <div class="inner">
+                  <p class="card-title">ULB Share</p>
+                  <h3 class="card-info">&#8377; {{ dmp_ulb_share.dmp_ulb_share }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="row row-card">
+            <h3 class="p-details">KNMT Project Details - Commissionerate of Town Panchayats (2021-22)</h3>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-blue">
+                <div class="inner">
+                  <p class="card-title">Total Projects</p>
+                  <h3 class="card-info"> {{ ctp_total_projects }} </h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-green">
+                <div class="inner">
+                  <p class="card-title">Total Cost</p>
+                  <h3 class="card-info">&#8377; {{ ctp_project_cost.ctp_project_cost }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-orange">
+                <div class="inner">
+                  <p class="card-title">KNMT Share</p>
+                  <h3 class="card-info">&#8377; {{ ctp_knmt.ctp_knmt }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+              <div class="card-box bg-red">
+                <div class="inner">
+                  <p class="card-title">ULB Share</p>
+                  <h3 class="card-info">&#8377; {{ ctp_ulb_share.ctp_ulb_share }} lakhs</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="charts">
+        <div class="row">
+            <div class="col piechart pl-150" style="margin-left:13px;">
+                <p class="p-details">KNMT - Sector Wise Number of Works Sanctioned<br>Overall<br>(2021-22)</p>
+                <div id="pieSector" style="max-width: 520px; margin: 35px auto;"></div>
+            </div>
+            <div class="col piechart pl-150" style="margin-right:13px;">
+                <p class="p-details">KNMT - Sector Wise Number of Works Sanctioned<br>Overall <br>(2021-22)</p>
+                <div id="donutSector" style="max-width: 520px; margin: 35px auto;"></div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="charts">
+        <div class="row">
+            <div class="col piechart pl-150" style="margin-left:13px;">
+                <p class="p-details">KNMT - Sector Wise Projects Sanctioned - Cost in lakhs<br>Directorate of Municipalities<br>(2021-22)</p>
+                <div id="pieSectorDMA" style="max-width: 520px; margin: 35px auto;"></div>
+            </div>
+            <div class="col piechart pl-150" style="margin-right:13px;">
+                <p class="p-details">KNMT - Sector Wise Number of Works Sanctioned<br>Directorate of Municipalities<br>(2021-22)</p>
+                <div id="donutSectoDMA" style="max-width: 520px; margin: 35px auto;"></div>
+            </div>
+        </div>
+    </div>     
+    <div class="charts">
+        <div class="row">
+            <div class="col piechart pl-150" style="margin-left:13px;">
+                <p class="p-details">KNMT - Sector Wise Projects Sanctioned - Cost in lakhs<br>Commissionerate of Town Panchayats<br>(2021-22)</p>
+                <div id="pieSectorCTP" style="max-width: 520px; margin: 35px auto;"></div>
+            </div>
+            <div class="col piechart pl-150" style="margin-right:13px;">
+                <p class="p-details">KNMT - Sector Wise Number of Works Sanctioned<br>Commissionerate of Town Panchayats<br>(2021-22)</p>
+                <div id="donutSectorCTP" style="max-width: 520px; margin: 35px auto;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row charts piechart">
+            <p class="p-details" style="margin-top:40px">Kalaignar Nagarpura Mempattu Thittam (KNMT)<br>Sector Wise Project Sanctioned - Cost in lakhs<br>Overall<br>(2021-22)</p>
+            <div id="SectorProjectCost" ></div>
+            <p class="footnote">* Note: Road works include BT road, CC road, Retaining wall, Paver Block, SWD, Culvert, Metal Beam.</p>
+    </div>
+      <div class="row charts piechart">
+            <p class="p-details" style="margin-top:40px">Kalaignar Nagarpura Mempattu Thittam (KNMT)<br>Sector Wise Project Sanctioned - Cost in lakhs<br>Directorate of Municipal Administration<br>(2021-22)</p>
+            <div id="SectorProjectCostDMA"></div>
+            <p class="footnote">* Note: Road works include BT road, CC road, Retaining wall, Paver Block, SWD, Culvert, Metal Beam.</p>
+      </div>
+      <div class="row charts piechart">
+            <p class="p-details" style="margin-top:40px">Kalaignar Nagarpura Mempattu Thittam (KNMT)<br>Sector Wise Project Sanctioned - Cost in lakhs<br>Commissionerate of Town Panchayats<br>(2021-22)</p>
+            <div id="SectorProjectCostCTP"></div>
+            <p class="footnote">* Note: Road works include BT road, CC road, Retaining wall, Paver Block, SWD, Culvert, Metal Beam.</p>
+      </div>
+
+       <div class="row row-card2 table-sector table-responsive">
+      <table class="border-grey" style="border-radius:5px;">
+        <p class="p-details">Kalaignar Nagarpura Mempattu Thittam (KNMT)<br>Sector Wise Projects Sanctioned - Cost in lakhs<br>(2021-22)</p>
+        <thead>
+        <col>
+          <colgroup span="2"></colgroup>
+          <colgroup span="2"></colgroup>
+          <tr class="border-grey">
+            <th class="border-grey th-t1-center">S.No</th>
+            <th class="border-grey th-t1-center">Name of the Sector</th>
+            <th class="border-grey th-t1-center"  colspan="3">Overall</th>
+            <th class="border-grey th-t1-center" colspan="3">DMA</th>
+            <th class="border-grey th-t1-center" colspan="3">CTP</th>
+        </tr>
+        <tr class="border-grey">
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right" colspan="1" scope="colgroup">No. of Works</th>
+          <th class="border-grey th-t2-center" colspan="2" scope="col">Project Cost</th>
+          <th class="border-grey th-t2-right" scope="col">No of Works</th>
+          <th class="border-grey th-t2-center" colspan="2" scope="col">Project Cost</th>
+          <th class="border-grey th-t2-right" scope="col">No. of Works</th>
+          <th class="border-grey th-t2-center" colspan="2" scope="col">Project Cost</th>
+        </tr>
+        <tr class="border-grey">
+            <th class="border-grey th-t3-right"></th>
+            <th class="border-grey th-t3-right"></th>
+            <th class="border-grey th-t3-right"></th>
+            <th class="border-grey th-t3-right" scope="col">Rs. in Lakhs</th>
+            <th class="border-grey th-t3-right" scope="col">Percentage</th>
+            <th class="border-grey th-t3-right" scope="col"></th>
+            <th class="border-grey th-t3-right" scope="col">Rs. in Lakhs</th>
+            <th class="border-grey th-t3-right" scope="col">Percentage</th>
+            <th class="border-grey th-t3-right" scope="col"></th>
+            <th class="border-grey th-t3-right" scope="col">Rs. in Lakhs</th>
+            <th class="border-grey th-t3-right" scope="col">Percentage</th>
+          </tr>
+        </thead>
+       <tbody>
+        {% include 'includes/sector_report.html' %}
+       </tbody>
+           <tfoot>
+              <tr class="border-grey" style="font-weight:bold; border-top:2px solid #DDDDDD;">
+            <td class="border-grey" ></td>
+            <td class="border-grey" style="text-align:right">Total </td>
+            <td class="border-grey" style="text-align:right">{{ total_projects }}</td>
+            <td class="border-grey" style="text-align:right">&#8377; {{ project_cost.project_cost }}</td>
+            <td class="border-grey" style="text-align:right">100 &percnt;</td>
+            <td class="border-grey" style="text-align:right">{{ dmp_total_projects }}</td>
+            <td class="border-grey" style="text-align:right">&#8377; {{ dmp_project_cost.dmp_project_cost }}</td>
+            <td class="border-grey" style="text-align:right">{{ DMA_total_percent }} &percnt;</td>
+            <td class="border-grey" style="text-align:right">{{ ctp_total_projects }}</td>
+            <td class="border-grey" style="text-align:right">&#8377; {{ ctp_project_cost.ctp_project_cost }}</td>
+            <td class="border-grey" style="text-align:right">{{ CTP_total_percent }} &percnt;</td>
+        </tr>
+
+          </tfoot>
+      </table>
+      <p class="footnote">* Note: Road works include BT road, CC road, Retaining wall, Paver Block, SWD, Culvert, Metal Beam Crash Barrier.</p>
+    </div>
+      
+    <div class="row row-card2 table-sector table-responsive">
+      <table class="border-grey" style="border-radius:5px;">
+        <p class="p-details">Kalaignar Nagarpura Mempattu Thittam (KNMT)<br>Sector Wise Progress Details - Cost in lakhs<br>Overall (2021-22)</p>
+        <thead>
+        <col>
+          <colgroup span="2"></colgroup>
+          <colgroup span="2"></colgroup>
+          <tr class="border-grey">
+            <th class="border-grey th-t1-center">S.No</th>
+            <th class="border-grey th-t1-center">Name of the Sector</th>
+            <th class="border-grey th-t1-center"  colspan="2">Approved</th>
+              <th class="border-grey th-t1-center"style="text-align: right;">Awarded Cost</th>
+            <th class="border-grey th-t1-center" colspan="2">Completed</th>
+            <th class="border-grey th-t1-center" colspan="2">In Progress</th>
+              <th class="border-grey th-t1-center" colspan="2">To be Commenced</th>
+        </tr>
+        <tr class="border-grey">
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right" >No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+                <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+          <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+            <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+        </tr>
+        </thead>
+       <tbody>
+       {% include 'includes/sector_progress.html' %}
+       </tbody>
+          <tfoot style="font-weight:bold; border-top:2px solid #DDDDDD;">
+          <tr class="border-grey {% cycle 'row1' 'row2'%}">
+    <td class="border-grey" style="text-align:center"></td>
+     <td class="border-grey" style="text-align:right">Total</td>
+    <td class="border-grey" style="text-align:right">{{ total_ap_project_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ total_approved_project_cost.project_cost }}</td>
+    <td class="border-grey" style="text-align: right;">&#8377; {{ total_awarded_cost.project_cost }}</td>
+    <td class="border-grey" style="text-align:right">{{ total_completed_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ total_completed_approved_project_cost.project_cost }}</td>
+
+     <td class="border-grey" style="text-align:right;">{{ total_inprogress_count }}</td>
+     <td class="border-grey" style="text-align:right">&#8377; {{ total_inprogress_approved_project_cost.project_cost }}</td>
+
+     <td class="border-grey" style="text-align:right">{{ total_tobecommenced_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ total_tobecommenced_project_cost.project_cost }}</td>
+</tr>
+          </tfoot>
+
+      </table>
+    <p class="footnote">* Note: Awarded cost is Work Order Amount with Tax.</p>
+    </div>
+      {% include 'includes/sector_progress_modal.html' %}
+
+      <div class="row row-card2 table-sector table-responsive">
+      <table class="border-grey" style="border-radius:5px;">
+        <p class="p-details">Kalaignar Nagarpura Mempattu Thittam (KNMT)<br>Sector Wise Progress Details - Cost in lakhs<br>Directorate of Municipalities (2021-22)</p>
+        <thead>
+        <col>
+          <colgroup span="2"></colgroup>
+          <colgroup span="2"></colgroup>
+          <tr class="border-grey">
+            <th class="border-grey th-t1-center">S.No</th>
+            <th class="border-grey th-t1-center">Name of the Sector</th>
+            <th class="border-grey th-t1-center"  colspan="2">Approved</th>
+              <th class="border-grey th-t1-center"style="text-align: right;">Awarded Cost</th>
+            <th class="border-grey th-t1-center" colspan="2">Completed</th>
+            <th class="border-grey th-t1-center" colspan="2">In Progress</th>
+              <th class="border-grey th-t1-center" colspan="2">To be Commenced</th>
+        </tr>
+        <tr class="border-grey">
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right" >No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+                <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+          <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+            <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+        </tr>
+        </thead>
+       <tbody>
+       {% include 'includes/DMAsector_progress.html' %}
+       </tbody>
+          <tfoot style="font-weight:bold; border-top:2px solid #DDDDDD;">
+          <tr class="border-grey {% cycle 'row1' 'row2'%}">
+    <td class="border-grey" style="text-align:center"></td>
+     <td class="border-grey" style="text-align:right">Total</td>
+    <td class="border-grey" style="text-align:right">{{ DMAtotal_approved_project_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ DMAtotal_approved_project_cost.project_cost }}</td>
+    <td class="border-grey" style="text-align: right;">&#8377; {{ DMAtotal_awarded_cost.project_cost }}</td>
+    <td class="border-grey" style="text-align:right">{{ DMAtotal_completed_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ DMAtotal_completed_approved_project_cost.project_cost }}</td>
+
+     <td class="border-grey" style="text-align:right;">{{ DMAtotal_inprogress_count }}</td>
+     <td class="border-grey" style="text-align:right">&#8377; {{ DMAtotal_inprogress_approved_project_cost.project_cost }}</td>
+
+     <td class="border-grey" style="text-align:right">{{ DMAtotal_tobecommenced_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ DMAtotal_tobecommenced_project_cost.project_cost }}</td>
+</tr>
+          </tfoot>
+
+      </table>
+ <p class="footnote">* Note: Awarded cost is Work Order Amount with Tax.</p>
+    </div>
+       {% include 'includes/DMA_sector_progress_modal.html' %}
+     <div class="row row-card2 table-sector table-responsive">
+      <table class="border-grey" style="border-radius:5px;">
+        <p class="p-details">Kalaignar Nagarpura Mempattu Thittam (KNMT)<br>Sector Wise Progress Details - Cost in lakhs<br>Commissionerate of Town Panchayats (2021-22)</p>
+        <thead>
+        <col>
+          <colgroup span="2"></colgroup>
+          <colgroup span="2"></colgroup>
+          <tr class="border-grey">
+            <th class="border-grey th-t1-center">S.No</th>
+            <th class="border-grey th-t1-center">Name of the Sector</th>
+            <th class="border-grey th-t1-center"  colspan="2">Approved</th>
+              <th class="border-grey th-t1-center"style="text-align: right;">Awarded Cost</th>
+            <th class="border-grey th-t1-center" colspan="2">Completed</th>
+            <th class="border-grey th-t1-center" colspan="2">In Progress</th>
+              <th class="border-grey th-t1-center" colspan="2">To be Commenced</th>
+        </tr>
+        <tr class="border-grey">
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right" >No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+                <th class="border-grey th-t2-right"></th>
+          <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+          <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+            <th class="border-grey th-t2-right">No. of Works</th>
+          <th class="border-grey th-t2-right">Project Cost</th>
+
+        </tr>
+        </thead>
+       <tbody>
+       {% include 'includes/CTPsector_progress.html' %}
+       </tbody>
+          <tfoot style="font-weight:bold; border-top:2px solid #DDDDDD;">
+          <tr class="border-grey {% cycle 'row1' 'row2'%}">
+    <td class="border-grey" style="text-align:center"></td>
+     <td class="border-grey" style="text-align:right">Total</td>
+    <td class="border-grey" style="text-align:right">{{ CTPtotal_approved_project_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ CTPtotal_approved_project_cost.project_cost }}</td>
+    <td class="border-grey" style="text-align: right;">&#8377; {{ CTPtotal_awarded_cost.project_cost }}</td>
+    <td class="border-grey" style="text-align:right">{{ CTPtotal_completed_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ CTPtotal_completed_approved_project_cost.project_cost }}</td>
+
+     <td class="border-grey" style="text-align:right;">{{ CTPtotal_inprogress_count }}</td>
+     <td class="border-grey" style="text-align:right">&#8377; {{ CTPtotal_inprogress_approved_project_cost.project_cost }}</td>
+
+     <td class="border-grey" style="text-align:right">{{ CTPtotal_tobecommenced_count }}</td>
+    <td class="border-grey" style="text-align:right">&#8377; {{ CTPtotal_tobecommenced_project_cost.project_cost }}</td>
+</tr>
+          </tfoot>
+
+      </table>
+ <p class="footnote">* Note: Awarded cost is Work Order Amount with Tax.</p>
+    </div>
+{% include 'includes/CTP_sector_progress_modal.html' %}
+    <div class="row-card2 table-sector">
+      <div id="map"></div>
+    </div>
+      <script>
+      $(function() {
+
+  $('[data-toggle="modal"]').hover(function() {
+    var modalId = $(this).data('target');
+    $(modalId).modal('show');
+
+  });
+
+});
+      </script>
+    <script>
+	    mapboxgl.accessToken = 'pk.eyJ1IjoiYXJ5YW5iaGF0dDEwMDIiLCJhIjoiY2tqaDFmcnloNDFpYTJybnFvbmk0cTliNyJ9.ImW_FZl5b1VBm1bYaLyziA';
+      var map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/mapbox/outdoors-v11',
+          center: [78.7,10.7801579], // starting position
+          zoom: 6.3 // starting zoom
+      });
+      // Set marker options.
+      map.addControl(new mapboxgl.NavigationControl());
+      // Add geolocate control to the map.
+        map.addControl(new mapboxgl.FullscreenControl());
+      map.on('load', () => {
+          map.addSource('places', {
+              'type': 'geojson',
+              'data': {
+                    
+                  'type': 'FeatureCollection',
+                  'features': [
+                  {%for i in district_map%}
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'description':'<p><strong>{{i.district}}</strong><br><br><strong>KNMT</strong><br><br><strong>Overall<br>Project Cost : </strong>&#8377; {{ i.District_project_cost.project_cost }} ( in lakhs )<br><strong>Total No of Works : </strong> {{ i.District_total_projects }}<br><br><strong>Corporation/Municipalities</strong><br><strong>Project Cost : </strong>&#8377; {{ i.DMA_project_cost.project_cost }} ( in lakhs )<br><strong>Total No of Works : </strong> {{ i.DMA_total_projects }}<br><br><strong>Town Panchayats</strong><br><strong>Project Cost : </strong>&#8377;  {{ i.CTP_project_cost.project_cost }} ( in lakhs )<br><strong>Total No of Works : </strong> {{ i.CTP_total_projects }}<br></p>'
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [{{i.Longitude|safe}},{{i.Latitude|safe}}]
+                    }
+                },
+                {%endfor%} 
+                ]
+            }
+         });
+        // Add a layer showing the places.
+        map.addLayer({
+        'id': 'places',
+        'type': 'circle',
+        'source': 'places',
+        'paint': {
+        'circle-color': '#145F8E',
+        'circle-radius': 8,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff'
+        }
+        });
+
+        // Create a popup, but don't add it to the map yet.
+        const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+        });
+
+        map.on('mouseenter', 'places', (e) => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+
+        // Copy coordinates array.
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const description = e.features[0].properties.description;
+
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popup.setLngLat(coordinates).setHTML(description).addTo(map);
+        });
+
+        map.on('mouseleave', 'places', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+        });
+        });
+</script>
+<script>
+    var options = {
+        series: [{% for i, j in donut_chart_sectorDMA.items %} {{ j }}, {% endfor %}],
+        dataLabels: {
+            formatter: function(val, opts){
+                return opts.w.config.series[opts.seriesIndex]
+            },
+        },
+        chart: {
+            width: '100%',
+            type: 'donut',
+            toolbar: {
+                show: true
+              }
+            
+        },
+        theme:{
+            palette: 'palette2',
+        },
+        plotOptions:{
+            pie:{
+                donut:{
+                    labels:{
+                        show: true,
+                    },
+                    total: {
+                        showAlways: true,
+                        label: 'Total',
+                        fontSize: '22px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 600,
+                        color: '#373d3f',
+                        formatter: function (w) {
+                            return w.globals.seriesTotals.reduce((a, b) => {
+                                return a + b
+                            }, 0)
+                        },
+                    },
+                },
+            },
+        },
+        labels: [{% for i, j in donut_chart_sectorDMA.items %} '{{ i }}', {% endfor %}],
+        responsive: [{
+            breakpoint: 1000,
+            options: {
+                chart: {
+                    width: 300
+                },
+                legend: {
+                    position: 'bottom'
+                },
+                
+            }
+        }]
+    };
+
+    var chart = new ApexCharts(document.querySelector("#donutSectoDMA"), options);
+    chart.render();
+</script>
+<script>
+    var options = {
+        series: [{% for i, j in donut_chart_CTP.items %} {{ j }}, {% endfor %}],
+        dataLabels: {
+            formatter: function(val, opts){
+                return opts.w.config.series[opts.seriesIndex]
+            },
+        },
+        chart: {
+             width: '100%',
+            type: 'donut',
+            toolbar: {
+                show: true
+              }
+            
+        },
+        theme:{
+            palette: 'palette2',
+        },
+        plotOptions:{
+            pie:{
+                donut:{
+                    labels:{
+                        show: true,
+                    },
+                    total: {
+                        showAlways: true,
+                        label: 'Total',
+                        fontSize: '22px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 600,
+                        color: '#373d3f',
+                        formatter: function (w) {
+                            return w.globals.seriesTotals.reduce((a, b) => {
+                                return a + b
+                            }, 0)
+                        },
+                    },
+                },
+            },
+        },
+        labels: [{% for i, j in donut_chart_CTP.items %} '{{ i }}', {% endfor %}],
+        responsive: [{
+            breakpoint: 1000,
+            options: {
+                chart: {
+                    width: 300
+                },
+                legend: {
+                    position: 'bottom'
+                },
+                
+            }
+        }]
+    };
+
+    var chart = new ApexCharts(document.querySelector("#donutSectorCTP"), options);
+    chart.render();
+</script>
+<script>
+    var options = {
+        series: [{% for i, j in pie_chart_CTP.items %} {{ j }}, {% endfor %}],
+        chart: {
+         width: '100%',
+        type: 'pie',
+        toolbar: {
+            show: true
+          }
+        
+        
+      },  
+      labels: [{% for i, j in pie_chart_CTP.items %} '{{ i }}', {% endfor %}],
+      responsive: [{
+        breakpoint: 1000,
+        options: {
+          chart: {
+            width: 300
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }]
+      };
+      var chart = new ApexCharts(document.querySelector("#pieSectorCTP"), options);
+      chart.render();
+</script>
+<script>
+    var options = {
+        series: [{% for i, j in donut_chart_sector.items %} {{ j }}, {% endfor %}],
+        dataLabels: {
+            formatter: function(val, opts){
+                return opts.w.config.series[opts.seriesIndex]
+            },
+        },
+        chart: {
+             width: '100%',
+            type: 'donut',
+            toolbar: {
+                show: true
+              }
+            
+        },
+        theme:{
+            palette: 'palette2',
+        },
+        plotOptions:{
+            pie:{
+                donut:{
+                    labels:{
+                        show: true,
+                    },
+                    total: {
+                        showAlways: true,
+                        label: 'Total',
+                        fontSize: '22px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 600,
+                        color: '#373d3f',
+                        formatter: function (w) {
+                            return w.globals.seriesTotals.reduce((a, b) => {
+                                return a + b
+                            }, 0)
+                        },
+                    },
+                },
+            },
+        },
+        labels: [{% for i, j in donut_chart_sector.items %} '{{ i }}', {% endfor %}],
+        responsive: [{
+            breakpoint: 1000,
+            options: {
+                chart: {
+                    width: 300
+                },
+                legend: {
+                    position: 'bottom'
+                },
+                
+            }
+        }]
+    };
+
+    var chart = new ApexCharts(document.querySelector("#donutSector"), options);
+    chart.render();
+</script>
+
+<script>
+    var options = {
+        series: [{% for i, j in pie_chart_sectorDMA.items %} {{ j }}, {% endfor %}],
+        chart: {
+        width: '100%',
+        type: 'pie',
+        toolbar: {
+            show: true
+          }
+        
+        
+      },  
+      labels: [{% for i, j in pie_chart_sectorDMA.items %} '{{ i }}', {% endfor %}],
+      responsive: [{
+        breakpoint: 1000,
+        options: {
+          chart: {
+            width: 300
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }]
+      };
+      var chart = new ApexCharts(document.querySelector("#pieSectorDMA"), options);
+      chart.render();
+</script>
+<script>
+    var options = {
+        series: [{% for i, j in pie_chart_sector.items %} {{ j }}, {% endfor %}],
+        chart: {
+            width: '100%',
+        type: 'pie',
+        toolbar: {
+            show: true
+          }
+        
+      },  
+      labels: [{% for i, j in pie_chart_sector.items %} '{{ i }}', {% endfor %}],
+      responsive: [{
+        breakpoint: 1000,
+        options: {
+          chart: {
+            width: 300,
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }]
+
+      };
+      var chart = new ApexCharts(document.querySelector("#pieSector"), options);
+      chart.render();
+</script>
+<script>
+    var options = 
+    {
+        series: [
+        {
+            name: 'Cost',
+            data: [{{ road.project_cost }},{% for row in sectorbarchartCTP %} {{row.project_cost}}, {% endfor %}]
+        }],
+        chart: 
+        {
+             width: '100%',
+            height: 440,
+            type: 'bar',
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 10,
+                distributed: true,
+                dataLabels: {
+                    position: 'top', // top, center, bottom
+                    enabled: false
+                },
+            }
+        },
+        legend: {
+            show:false,
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return "\u20B9" + val;
+            },
+            offsetY: -20,
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            }
+        },
+      
+        xaxis: {
+            categories: ["Road Works", {% for row in sectorbarchartCTP %} "{{ row.Sector }}", {% endfor %}],
+            axisBorder: {
+                show: true
+            },
+            axisTicks: {
+                show: false
+            },
+            title: {
+                text: 'Name of the Sector',
+                style: {
+                    fontFamily: 'Roboto',
+                    fontSize: '14px',
+                    fontWeight: 'bolder',
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Cost',
+                style: {
+                    fontFamily: 'Roboto',
+                    fontSize: '14px',
+                    fontWeight: 'bolder',
+                }
+            },
+            axisBorder: {
+            show: false
+        },
+        axisTicks: {
+            show: false,
+        },
+        labels: {
+            show: true,
+            formatter: function (val) {
+                return "\u20B9" + val;
+            }
+        }
+        },
+    };
+    var chart = new ApexCharts(document.querySelector("#SectorProjectCostCTP"), options);
+    chart.render();
+    
+</script>  
+<script>
+    var options = 
+    {
+        series: [
+        {
+            name: 'Cost',
+            data: [{{ roadDMA.project_cost }},{% for row in sectorbarchartDMA %} {{row.project_cost}}, {% endfor %}]
+        }],
+        chart: 
+        {
+             width: '100%',
+            height: 480,
+            type: 'bar',
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 10,
+                distributed: true,
+                dataLabels: {
+                    position: 'top', // top, center, bottom
+                    enabled: false
+                },
+            }
+        },
+        legend: {
+            show:false,
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return "\u20B9" + val;
+            },
+            offsetY: -20,
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            }
+        },
+      
+        xaxis: {
+            categories: ["Road Works", {% for row in sectorbarchartDMA %} "{{ row.Sector }}", {% endfor %}],
+            axisBorder: {
+                show: true
+            },
+            axisTicks: {
+                show: false
+            },
+            title: {
+                text: 'Name of the Sector',
+                style: {
+                    fontFamily: 'Roboto',
+                    fontSize: '14px',
+                    fontWeight: 'bolder',
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Cost',
+                style: {
+                    fontFamily: 'Roboto',
+                    fontSize: '14px',
+                    fontWeight: 'bolder',
+                }
+            },
+            axisBorder: {
+            show: false
+        },
+        axisTicks: {
+            show: false,
+        },
+        labels: {
+            show: true,
+            formatter: function (val) {
+                return "\u20B9" + val;
+            }
+        }
+        },
+    };
+    var chart = new ApexCharts(document.querySelector("#SectorProjectCostDMA"), options);
+    chart.render();
+    
+</script>
+<script>
+    var options = 
+    {
+        series: [
+        {
+
+            name: 'Cost',
+            data: [{{ road.project_cost }},{% for row in sectorbarchart %} {{row.project_cost}}, {% endfor %}]
+        }],
+        chart:{
+             width: '100%',
+            height: 480,
+            type: 'bar',
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 10,
+                distributed: true,
+                dataLabels: {
+                    position: 'top', // top, center, bottom
+                    enabled: false
+                },
+            }
+        },
+        legend: {
+            show:false,
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return "\u20B9" + val;
+            },
+            offsetY: -20,
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            }
+        },
+      
+        xaxis: {
+            categories: ["Road Works", {% for row in sectorbarchart %} "{{ row.Sector }}", {% endfor %}],
+            axisBorder: {
+                show: true
+            },
+            axisTicks: {
+                show: false
+            },
+            title: {
+                text: 'Name of the Sector',
+                style: {
+                    fontFamily: 'Roboto',
+                    fontSize: '14px',
+                    fontWeight: 'bolder',
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Cost',
+                style: {
+                    fontFamily: 'Roboto',
+                    fontSize: '14px',
+                    fontWeight: 'bolder',
+                }
+            },
+            axisBorder: {
+            show: false
+        },
+        axisTicks: {
+            show: false,
+        },
+        labels: {
+            show: true,
+            formatter: function (val) {
+                return "\u20B9" + val;
+            }
+        }
+        },
+    };
+
+
+    var chart = new ApexCharts(document.querySelector("#SectorProjectCost"), options);
+    chart.render();
+    
+</script>
+    {% elif group.name == 'Town Panchayat'%}
+        <div class="row row-card ulb-project-details">
+            <p class="p-details">Project Details</p>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-blue">
+                    <div class="inner">
+                        <p class="card-title">Total Projects</p>
+                        <h3 class="card-info"> {{ ulb_total_project }} </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-green">
+                    <div class="inner">
+                    <p class="card-title">Total Cost</p>
+                    <h3 class="card-info">&#8377; {{ ulb_project_cost.project_cost }} lakhs</h3>
+                  </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-orange">
+                    <div class="inner">
+                        <p class="card-title">KNMT Share</p>
+                        <h3 class="card-info">&#8377; {{ ulb_knmt_share.knmt_share }} lakhs</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-red">
+                    <div class="inner">
+                        <p class="card-title">ULB Share</p>
+                        <h3 class="card-info">&#8377; {{ ulb_share_ulb.ulb_share }} lakhs</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="row">
+                <div class="col piechart" style="margin-left:13px;">
+                    <div id="pieSector"></div>
+                </div>
+                <div class="col piechart" style="margin-right:13px;">
+                    <div id="donutSector"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+            var options = {
+                series: [{% for i in ulbdonutchart %} {{ i.ulb_works }}, {% endfor %}],
+                title: {
+                    text: 'Sector Wise Number of Works Sanctioned',
+                    align: 'center',
+                    margin: 10,
+                    offsetX: 30,
+                    offsetY: 0,
+                    floating: false,
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        fontFamily: 'Roboto',
+                        color: '#145F8E'
+                  }
+                },
+                dataLabels: {
+                    formatter: function(val, opts){
+                        return opts.w.config.series[opts.seriesIndex]
+                    },
+                },
+                chart: {
+                    width: 410,
+                    type: 'donut',
+                },
+                theme:{
+                    palette: 'palette2',
+                },
+                plotOptions:{
+                    pie:{
+                        donut:{
+                            labels:{
+                                show: true,
+                            },
+                            total: {
+                                showAlways: true,
+                                label: 'Total',
+                                fontSize: '22px',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                fontWeight: 600,
+                                color: '#373d3f',
+                                formatter: function (w) {
+                                    return w.globals.seriesTotals.reduce((a, b) => {
+                                        return a + b
+                                    }, 0)
+                                },
+                            },
+                        },
+                    },
+                },
+                labels: [{% for i in ulbdonutchart %} '{{ i.Sector }}', {% endfor %}],
+                responsive: [{
+                    breakpoint: 1000,
+                    options: {
+                        chart: {
+                            width: 300
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+                        
+                    }
+                }]
+            };
+        
+            var chart = new ApexCharts(document.querySelector("#donutSector"), options);
+            chart.render();
+        </script>
+        <script>
+            var options = {
+                series: [{% for i in ulbpiechart %} {{ i.ulb_project_cost}}, {% endfor %}],
+                chart: {
+                width: 410,
+                type: 'pie',
+                
+              },  
+              title: {
+                  text: 'Sector Wise Projects Sanctioned - Cost in lakhs',
+                  align: 'left',
+                  margin: 10,
+                  offsetX: 30,
+                  offsetY: 0,
+                  floating: false,
+                  style: {
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      fontFamily: 'Roboto',
+                      color: '#145F8E'
+                }
+              },
+              labels: [{% for i in ulbpiechart %} '{{ i.Sector }}', {% endfor %}],
+              responsive: [{
+                breakpoint: 1000,
+                options: {
+                  chart: {
+                    width: 300
+                  },
+                  legend: {
+                    position: 'bottom'
+                  }
+                }
+              }]
+              };
+              var chart = new ApexCharts(document.querySelector("#pieSector"), options);
+              chart.render();
+        </script>
+        {% elif group.name == 'Municipality' %}
+            <div class="row row-card ulb-project-details">
+            <p class="p-details">Project Details</p>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-blue">
+                    <div class="inner">
+                        <p class="card-title">Total Projects</p>
+                        <h3 class="card-info"> {{ ulb_total_project }} </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-green">
+                    <div class="inner">
+                    <p class="card-title">Total Cost</p>
+                    <h3 class="card-info">&#8377; {{ ulb_project_cost.project_cost }} lakhs</h3>
+                  </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-orange">
+                    <div class="inner">
+                        <p class="card-title">KNMT Share</p>
+                        <h3 class="card-info">&#8377; {{ ulb_knmt_share.knmt_share }} lakhs</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-red">
+                    <div class="inner">
+                        <p class="card-title">ULB Share</p>
+                        <h3 class="card-info">&#8377; {{ ulb_share_ulb.ulb_share }} lakhs</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="row">
+                <div class="col piechart" style="margin-left:13px;">
+                    <div id="pieSector"></div>
+                </div>
+                <div class="col piechart" style="margin-right:13px;">
+                    <div id="donutSector"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+            var options = {
+                series: [{% for i in ulbdonutchart %} {{ i.ulb_works }}, {% endfor %}],
+                title: {
+                    text: 'Sector Wise Number of Works Sanctioned',
+                    align: 'center',
+                    margin: 10,
+                    offsetX: 30,
+                    offsetY: 0,
+                    floating: false,
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        fontFamily: 'Roboto',
+                        color: '#145F8E'
+                  }
+                },
+                dataLabels: {
+                    formatter: function(val, opts){
+                        return opts.w.config.series[opts.seriesIndex]
+                    },
+                },
+                chart: {
+                    width: 410,
+                    type: 'donut',
+                },
+                theme:{
+                    palette: 'palette2',
+                },
+                plotOptions:{
+                    pie:{
+                        donut:{
+                            labels:{
+                                show: true,
+                            },
+                            total: {
+                                showAlways: true,
+                                label: 'Total',
+                                fontSize: '22px',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                fontWeight: 600,
+                                color: '#373d3f',
+                                formatter: function (w) {
+                                    return w.globals.seriesTotals.reduce((a, b) => {
+                                        return a + b
+                                    }, 0)
+                                },
+                            },
+                        },
+                    },
+                },
+                labels: [{% for i in ulbdonutchart %} '{{ i.Sector }}', {% endfor %}],
+                responsive: [{
+                    breakpoint: 1000,
+                    options: {
+                        chart: {
+                            width: 300
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+
+                    }
+                }]
+            };
+
+            var chart = new ApexCharts(document.querySelector("#donutSector"), options);
+            chart.render();
+        </script>
+        <script>
+            var options = {
+                series: [{% for i in ulbpiechart %} {{ i.ulb_project_cost}}, {% endfor %}],
+                chart: {
+                width: 410,
+                type: 'pie',
+
+              },
+              title: {
+                  text: 'Sector Wise Projects Sanctioned - Cost in lakhs',
+                  align: 'left',
+                  margin: 10,
+                  offsetX: 30,
+                  offsetY: 0,
+                  floating: false,
+                  style: {
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      fontFamily: 'Roboto',
+                      color: '#145F8E'
+                }
+              },
+              labels: [{% for i in ulbpiechart %} '{{ i.Sector }}', {% endfor %}],
+              responsive: [{
+                breakpoint: 1000,
+                options: {
+                  chart: {
+                    width: 300
+                  },
+                  legend: {
+                    position: 'bottom'
+                  }
+                }
+              }]
+              };
+              var chart = new ApexCharts(document.querySelector("#pieSector"), options);
+              chart.render();
+        </script>
+      {% elif group.name == 'Corporation' %}
+            <div class="row row-card ulb-project-details">
+            <p class="p-details">Project Details</p>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-blue">
+                    <div class="inner">
+                        <p class="card-title">Total Projects</p>
+                        <h3 class="card-info"> {{ ulb_total_project }} </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-green">
+                    <div class="inner">
+                    <p class="card-title">Total Cost</p>
+                    <h3 class="card-info">&#8377; {{ ulb_project_cost.project_cost }} lakhs</h3>
+                  </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-orange">
+                    <div class="inner">
+                        <p class="card-title">Singara Chennai 2.0 Share</p>
+                        <h3 class="card-info">&#8377; {{ ulb_singara_share.singara_share }} lakhs</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 mb-5">
+                <div class="card-box bg-red">
+                    <div class="inner">
+                        <p class="card-title">ULB Share</p>
+                        <h3 class="card-info">&#8377; {{ ulb_share_ulb_singara.ulb_share }} lakhs</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="row">
+                <div class="col piechart" style="margin-left:13px;">
+                    <div id="pieSector"></div>
+                </div>
+                <div class="col piechart" style="margin-right:13px;">
+                    <div id="donutSector"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+            var options = {
+                series: [{% for i in ulbdonutchart %} {{ i.ulb_works }}, {% endfor %}],
+                title: {
+                    text: 'Sector Wise Number of Works Sanctioned',
+                    align: 'center',
+                    margin: 10,
+                    offsetX: 30,
+                    offsetY: 0,
+                    floating: false,
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        fontFamily: 'Roboto',
+                        color: '#145F8E'
+                  }
+                },
+                dataLabels: {
+                    formatter: function(val, opts){
+                        return opts.w.config.series[opts.seriesIndex]
+                    },
+                },
+                chart: {
+                    width: 410,
+                    type: 'donut',
+                },
+                theme:{
+                    palette: 'palette2',
+                },
+                plotOptions:{
+                    pie:{
+                        donut:{
+                            labels:{
+                                show: true,
+                            },
+                            total: {
+                                showAlways: true,
+                                label: 'Total',
+                                fontSize: '22px',
+                                fontFamily: 'Helvetica, Arial, sans-serif',
+                                fontWeight: 600,
+                                color: '#373d3f',
+                                formatter: function (w) {
+                                    return w.globals.seriesTotals.reduce((a, b) => {
+                                        return a + b
+                                    }, 0)
+                                },
+                            },
+                        },
+                    },
+                },
+                labels: [{% for i in ulbdonutchart %} '{{ i.Sector }}', {% endfor %}],
+                responsive: [{
+                    breakpoint: 1000,
+                    options: {
+                        chart: {
+                            width: 300
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+
+                    }
+                }]
+            };
+
+            var chart = new ApexCharts(document.querySelector("#donutSector"), options);
+            chart.render();
+        </script>
+        <script>
+            var options = {
+                series: [{% for i in ulbpiechart %} {{ i.ulb_project_cost}}, {% endfor %}],
+                chart: {
+                width: 410,
+                type: 'pie',
+
+              },
+              title: {
+                  text: 'Sector Wise Projects Sanctioned - Cost in lakhs',
+                  align: 'left',
+                  margin: 10,
+                  offsetX: 30,
+                  offsetY: 0,
+                  floating: false,
+                  style: {
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      fontFamily: 'Roboto',
+                      color: '#145F8E'
+                }
+              },
+              labels: [{% for i in ulbpiechart %} '{{ i.Sector }}', {% endfor %}],
+              responsive: [{
+                breakpoint: 1000,
+                options: {
+                  chart: {
+                    width: 300
+                  },
+                  legend: {
+                    position: 'bottom'
+                  }
+                }
+              }]
+              };
+              var chart = new ApexCharts(document.querySelector("#pieSector"), options);
+              chart.render();
+        </script>
+        {% elif group.name == 'Website Admin' %}
+        
+    {% endif%}
+{% endfor %}
+{% endblock %}
+
+{% block pagination %}{% endblock  %}

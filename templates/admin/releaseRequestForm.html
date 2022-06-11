@@ -1,0 +1,157 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+<script src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+<style>
+    .field-ApprovedProjectCost{
+      font-weght: bold !important;
+      color:red !important;
+      font-size:15px !important; 
+    }
+  </style>
+{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; {% if has_view_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+&rsaquo; {% if add %}{% blocktranslate with name=opts.verbose_name %}Add {{ name }}{% endblocktranslate %}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+</div>
+{% endblock %}
+{% endif %}
+
+{% block content %}<div id="content-main">
+{% block object-tools %}
+{% if change %}{% if not is_popup %}
+  <ul class="object-tools">
+    {% block object-tools-items %}
+      {% change_form_object_tools %}
+    {% endblock %}
+  </ul>
+{% endif %}{% endif %}
+{% endblock %}
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+{% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+{% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+{% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+{% if errors %}
+    <p class="errornote">
+    {% if errors|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+    </p>
+    {{ adminform.form.non_field_errors }}
+{% endif %}
+
+{% block field_sets %}
+{% for fieldset in adminform %}
+  {% include "admin/includes/fieldset.html" %}
+{% endfor %}
+{% endblock %}
+
+{% block after_field_sets %}{% endblock %}
+
+{% block inline_field_sets %}
+{% for inline_admin_formset in inline_admin_formsets %}
+    {% include inline_admin_formset.opts.template %}
+{% endfor %}
+{% endblock %}
+
+{% block after_related_objects %}{% endblock %}
+
+{% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+
+{% block admin_change_form_document_ready %}
+    <script id="django-admin-form-add-constants"
+            src="{% static 'admin/js/change_form.js' %}"
+            {% if adminform and add %}
+                data-model-name="{{ opts.model_name }}"
+            {% endif %}
+            async>
+    </script>
+{% endblock %}
+
+{# JavaScript for prepopulated fields #}
+{% prepopulated_fields_js %}
+
+</div>
+</form></div>
+<script src="{% static 'vendors/jquery-3.4.1/jquery-3.4.1.slim.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/choicefilter.js' %}"></script>
+<script type="text/javascript">
+    window.onload = function() {
+        var Scheme = document.getElementById("id_Scheme");
+        var ULBType = document.getElementById("id_AgencyType");
+  		var AgencyName = document.getElementById("id_AgencyName");
+  		var Sector = document.getElementById("id_Sector");
+        var Project_ID = document.getElementById("id_Project_ID");
+
+        Scheme.filtchoices(ULBType,{
+            data:{
+                "1":["1","2"],
+                "2":["3"]
+            }
+        });
+
+        ULBType.filtchoices(AgencyName, {
+            data: {
+                "1":[{% for i in municipality %}"{{ i }}",{% endfor %}],
+                "2":[{% for i in townPanchayat %}"{{ i }}",{% endfor %}],
+                "3":[{% for i in corporation %}"{{ i }}",{% endfor %}],
+            }
+        });
+
+        AgencyName.filtchoices(Sector,{
+  			data:{
+                {%for i in ULB_Sector%}
+                "{{i.AgencyName}}":{{i.Sector|safe}},
+                {%endfor%}
+  			}   
+  		});
+  	}
+</script>
+<script>
+    
+    $('#id_Project_ID').html(''); 
+    const myArray2 = [{% for i in project_ids %} ["{{ i.AgencyName }}", "{{ i.Sector }}", "{{ i.Project_ID }}"], {%endfor%}];
+    $("#id_purpose").change(abc);
+    const myArray = new Array("--------",);
+    function abc(){
+       
+        var dropdown = document.getElementById("id_Project_ID");
+        var agencyName = $("#id_AgencyName").val();
+        var sector = $("#id_Sector").val();
+        var purpose = $("#id_purpose").val();
+        
+       
+        for (var i=0; i<myArray2.length; ++i){
+            if((myArray2[i][0]==agencyName) && (myArray2[i][1]==sector) && (purpose == "Project")){
+                myArray.push(myArray2[i][2]);
+            }
+        }
+
+        for (var i = 0; i < myArray.length; ++i) {
+            dropdown[dropdown.length] = new Option(myArray[i], myArray[i]);
+        }
+        
+    }
+
+  
+</script>
+<script>
+    var dropdown = document.getElementById("id_Project_ID");
+    dropdown[dropdown.length] = new Option({%for i in p%}"{{i.project}}"{%endfor%}, {%for i in p%}"{{i.project}}"{%endfor%});
+</script>
+{% endblock %}
+

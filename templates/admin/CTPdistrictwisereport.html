@@ -1,0 +1,220 @@
+{% extends 'admin/change_list.html' %}
+{% load i18n admin_urls static admin_list %}
+{% block content_title %}<h1>CTP District Wise Report</h1>{% endblock %}
+{% block extrastyle %}
+  {{ block.super }}
+  {% load  static %}
+  <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
+  {% if cl.formset %}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+  {% endif %}
+  {% if cl.formset or action_form %}
+    <script src="{% url 'admin:jsi18n' %}"></script>
+  {% endif %}
+  {{ media.css }}
+  {% if not actions_on_top and not actions_on_bottom %}
+    <style>
+      #changelist table thead th:first-child {width: inherit}
+    </style>
+  {% endif %}
+    {% block object-tools %}
+<ul class="object-tools">
+  {% block object-tools-items %}
+    <li><input type="button" id="btnExport2" value="Export as Excel" onclick="ExportToExcel('xlsx')"/></li>
+    <li><input type="button" id="btnExport" value="Export As Pdf" onclick="createPDF()"/></li>
+  {% endblock %}
+</ul>
+{% endblock %}
+  <style>
+    .object-tools a.addlink{
+        display: none;
+    }
+
+   .btn-export{
+        display: flex;
+        margin-left:530px;
+    }
+    #btnExport2{
+        float: right !important;
+        height: 45px;
+    }
+    #btnExport{
+        float: right !important;
+        height: 45px;
+        margin-left: 5px;
+
+    }
+    .report-pdf{
+      display: inline-flex;
+    }
+    .report-h4{
+        text-align: center;
+        color:#666;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+    }
+    .border-grey {
+          border: 1px solid #babebe;
+      }
+  </style>
+  <style>
+    @media (max-width: 767px){
+      .object-tools{
+          display: none;
+      }
+  }
+  </style>
+{% endblock %}
+
+{% block result_list %}
+<div class="export-btn">
+  <ul class="d-flex">
+    <li><input type="button" id="btnExport2" value="Export as Excel" onclick="ExportToExcel('xlsx')"/></li>
+    <li><input type="button" id="btnExport" value="Export As Pdf" onclick="createPDF()"/></li>
+  </ul>
+</div>
+  <div class="results" id="results">
+      <table>
+            <caption>KNMT- CTP District Wise Project Sanctioned Details</caption>
+          <thead>
+            <col>
+                <colgroup span="2"></colgroup>
+                <colgroup span="2"></colgroup>
+                <tr class="border-grey">
+                    <th class="border-grey" style="text-align:center;" >S.No</th>
+                    <th class="border-grey"> Name of the District</th>
+                    {% for i in KNMT_Sector %}
+                        <th class="border-grey" style="text-align:center;" colspan="2">{{ i.Sector }}</th>
+                    {% endfor %}
+                    <th class="border-grey" style="text-align:center;" colspan="2">Total</th>
+                </tr>
+                <tr>
+                    <th class="border-grey"></th>
+                    <th class="border-grey"></th>
+                    {% for i in KNMT_Sector %}
+                    <th class="border-grey" style="text-align:right;" scope="col">No</th>
+                    <th class="border-grey" style="text-align:right;" scope="col">Cost</th>
+                    {% endfor %}
+                    <th class="border-grey" style="text-align:right;" scope="col">No</th>
+                    <th class="border-grey" style="text-align:right;" scope="col">Cost</th>
+                </tr>
+          </thead>
+                <tbody>
+                    {% for row in final_data%}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td class="border-grey" style="text-align:right;" > {{forloop.counter}} </td>
+                        <td class="border-grey"> {{ row.district }} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.BTRoadNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.BTRoadCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.BusStandNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.BusStandCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.CCRoadNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.CCRoadCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.ClNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.ClCost.project_cost}} </td>  
+                        <td class="border-grey" style="text-align: right"> {{ row.CrematoriumNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.CrematoriumCost.project_cost}}</td>
+                        <td class="border-grey" style="text-align: right"> {{ row.CulvertNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.CulvertCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.KC_No }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.KC_Cost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.MarketNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.MarketCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.mbcbNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.mbcbCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.ParksNo }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.ParksCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.PBno }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.PBCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.RWno }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.RWCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.SWMno }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.SWMCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.SWDno }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.SWDCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.WBno }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.WBCost.project_cost}} </td>
+                        <td class="border-grey" style="text-align: right"> {{ row.totalno }} </td>
+                        <td class="border-grey" style="text-align: right">&#8377; {{ row.totalcost.project_cost }} </td>
+                </tr>
+                {%endfor%}
+              
+      <tr class="{% cycle 'row1' 'row2' %}">
+    <td class="border-grey"> </td>
+    <td class="border-grey" style="text-align: right"> Total </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_BT_RoadDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_BT_RoadDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMABusStandNo }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMABusStandCost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_CC_RoadDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_CC_RoadDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMAClNo }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMAClCost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_CrematoriumDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_CrematoriumDMA_Cost.project_cost}}</td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_CulvertDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_CulvertDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_KnowledgeDMA_Centre_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_KnowledgeDMA_Centre_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_MarketDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_MarketDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMAmbcbNo }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMAmbcbCost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_ParksDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_ParksDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_PaverBlockDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_PaverBlockDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMARWno }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMARWCost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMASWMno }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMASWMCost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_SWDDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_SWDDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_WBDMA_No }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_WBDMA_Cost.project_cost}} </td>
+    <td class="border-grey" style="text-align: right"> {{ DMA_total_no }} </td>
+    <td class="border-grey" style="text-align: right">&#8377; {{ DMA_total_cost.project_cost }} </td>
+</tr>
+
+                </tbody>
+      </table>
+</div>
+<!-- ... -->
+    {% load static %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.1/xlsx.full.min.js"></script>
+    <script type="text/javascript">
+        function createPDF() {
+        var sTable = document.getElementById('results').innerHTML;
+
+        var style = "<style>";
+        style = style + ".report-h4 {text-align:center; text-transform: uppercase; display:none;}";
+        style = style + "title {text-align:center; text-transform: uppercase; font-weight:bold; font-size:large;}";
+        style = style + "table {width: 100%;font: 17px Calibri;}";
+        style = style + "table, th, td {border: solid 1px #DDD; border-collapse: collapse;";
+        style = style + "padding: 2px 3px;text-align: center;}";
+        style = style + ".text a{text-decoration: none; color:black}"
+        style = style + "</style>";
+
+        var win = window.open('', '', 'height=700,width=700');
+        win.document.write('<html><head>');
+        win.document.write(style);
+        win.document.write('</head>');
+        win.document.write('<body>');
+        win.document.write(sTable);
+        win.document.write('</body></html>');
+        win.document.close();
+        win.print();
+    }
+    </script>
+     <script>
+        function ExportToExcel(type, fn, dl) {
+            var elt = document.getElementById('results');
+            var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+            return dl ?
+                XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+                XLSX.writeFile(wb, fn || ('GOReport.' + (type || 'xlsx')));
+        }
+    </script>
+{% endblock %}
+
+{% block pagination %}{% endblock  %}

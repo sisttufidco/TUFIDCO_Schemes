@@ -1,0 +1,150 @@
+{% url 'home' as home_url %}
+{% url 'about' as about_url %}
+{% url 'gallery' as gallery_url %}
+{% url 'contact' as contact_url %}
+{% url 'faq' as FAQ_url %}
+{% url 'knmt' as KNMT_url %}
+{% url 'knmt_g' as KNMT_G_URL %}
+{% url 'knmtAS' as KNMTAS_url %}
+{% url 'SChennai2.0' as SingaraChennai_url %}
+{% url 'SChennaiGuidelines' as SChennai_guidelines %}
+{% url 'SChennaiAS' as SchennaiAS %}
+<!-- Start Header-->
+  <header>
+    <!-- Top Bar-->
+    <div class="topbar">
+      <div class="container-fluid">
+        <div class="row"><div class="col-md-12">
+          {% for i in tufidco_info %}
+            <p class="pull-left half-left hidden-xs">
+              <img src="{{ i.india_flag.url }}" alt="flag">
+              <span class="topbar-title">{{ i.govt_title }}</span>
+            </p>
+            <a>
+              <p class="pull-right half-right">
+                <i class="fa fa-calendar"><span class="topbar-title" id="date"></span></i>
+                <i class="fa fa-clock-o" style="margin-left:5px;"><span class="topbar-title" id="time" ></span></i>
+              </p>
+            </a>
+          {% endfor %}
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Top Bar -->
+    <!-- Middle header -->
+    <div class="container header">
+      <div class="row">
+        <div class="col-md-11 col-xs-12">
+          {% for i in tufidco_info%}
+            <img class="logo-img" src="{{ i.logo.url }}" alt="logo">
+            <div class="header-name">
+              <h1 class="title-org">{{ i.title}}</h1>
+              <h3 class="title-org">தமிழ்நாடு நகர்ப்புற நிதி மற்றும் உள்கட்டமைப்பு மேம்பாட்டுக் கழகம் லிமிடெட்</h3>
+              <p class="govt_title">({{ i.govt_title }})</p>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="col-md-1 col-xs-12">
+          {% for i in tufidco_info %}
+            <img class="tamil_nadu_logo" src="{{ i.tamilnadulogo.url}}" alt="Tamil Nadu Logo">
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- End Middle Header-->
+    <!-- NavBar -->
+    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+      <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="fa fa-bars"></span> Menu
+        </button>
+        <form action="javascript:void(0)" class="searchform order-lg-last">
+          <div class="form-group d-flex">
+            <input type="text" class="form-control pl-3" placeholder="Search">
+            <button type="submit" class="form-control search"><span class="fa fa-search"></span></button>
+          </div>
+        </form>
+        <div class="collapse navbar-collapse" id="ftco-nav">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item {% if request.path == home_url %}active-nav{% endif %}"><a href="{% url 'home' %}" class="nav-link">Home</a></li>
+            <li class="nav-item {% if request.path == about_url %}active-nav{% endif %}"><a href="{% url 'about' %}" class="nav-link">ABOUT</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link  {% if request.path == SingaraChennai_url %}active-nav{% endif %} {% if request.path == SChennai_guidelines %}active-nav{% endif %} {% if request.path == SchennaiAS %}active-nav{% endif %} {% if request.path == KNMT_url %}active-nav{% endif %} {% if request.path == KNMTAS_url %}active-nav{% endif %} {% if request.path == KNMT_G_URL %}active-nav{% endif %} dropdown-toggle" href="javascript:void(0)" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SCHEME</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown04">
+                <a class="dropdown-item {% if request.path == KNMT_url%}active-dropdown{% endif %} {% if request.path == KNMT_G_URL%}active-dropdown{% endif %} {% if request.path == KNMTAS_url%}active-dropdown{% endif %}"  href="{% url 'knmt' %}">KNMT</a>
+                <a class="dropdown-item {% if request.path == SingaraChennai_url %}active-dropdown{% endif %}" href="{% url 'SChennai2.0' %}">Singara Chennai 2.0</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> REPORT </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="javascript:void(0)">KNMT</a>
+                                <ul class="dropdown-menu">
+                      <li class="dropdown-submenu">
+                      <a class="dropdown-item" href="javascript:void(0)">GO Wise Report</a>
+                      <ul class="dropdown-menu">
+                        <li class="dropdown-item">
+                          <a class="dropdown-item" href="/admin/reports/report/?Scheme__id__exact=1">Overall</a>
+                        </li>
+                        <li class="dropdown-item">
+                          <a class="dropdown-item" href="/admin/reports/report/?AgencyType__id__exact=1&Scheme__id__exact=1">Municipality</a>
+                        </li>
+                        <li class="dropdown-item">
+                          <a class="dropdown-item" href="/admin/reports/report/?AgencyType__id__exact=2&Scheme__id__exact=1">Town Panchayat</a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li class="dropdown-submenu">
+                      <a class="dropdown-item" href="javascript:void(0)">Sector Wise Report</a>
+                      <ul class="dropdown-menu">
+                        <li class="dropdown-item">
+                          <a class="dropdown-item" href="/admin/reports/sectormasterreport/?Scheme__id__exact=1">Overall</a>
+                        </li>
+                        <li class="dropdown-item">
+                          <a class="dropdown-item" href="/admin/reports/sectormasterreport/?AgencyType__id__exact=1&Scheme__id__exact=1">Municipality</a>
+                        </li>
+                        <li class="dropdown-item">
+                          <a class="dropdown-item" href="/admin/reports/sectormasterreport/?AgencyType__id__exact=2&Scheme__id__exact=1">Town Panchayat</a>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                            </li>
+                      <li class="dropdown-submenu"><a class="dropdown-item dropdown-toggle" href="javascript:void(0)">Singara Chennai 2.0</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/admin/reports/report/?Scheme__id__exact=2">Go Wise Report</a></li>
+                                    <li><a class="dropdown-item" href="/admin/reports/sectormasterreport/?Scheme__id__exact=2">Sector Wise Report</a></li>
+                                </ul>
+                            </li>
+                </ul>
+            </li>
+              <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="dropdown05" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Downloads</a>
+              <div class="dropdown-submenu dropdown-menu" aria-labelledby="dropdown04">
+                <a class="dropdown-item" tabindex="-1" href="javascript:void(0)" >KNMT</a>
+                  <ul class="dropdown-menu" style="margin-top: 10px">
+                      {% if user.is_authenticated %}
+                          {% for i in ulb_release_requests %}
+                        <li class="dropdown-item">
+                            <a class="dropdown-item" href="{{ i.form.url }}">{{ i.name_of_form }}</a>
+                        </li>
+                          {% endfor %}
+                      {% endif%}
+                  </ul>
+              </div>
+            </li>
+            <li class="nav-item {% if request.path == gallery_url %}active{% endif %}"><a href="{% url 'gallery' %}" class="nav-link">GALLERY</a></li>
+            <li class="nav-item {% if request.path == contact_url %}active{% endif %}"><a href="{% url 'contact' %}" class="nav-link">CONTACT US</a></li>
+            <li class="nav-item {% if request.path == FAQ_url %}active{% endif %}"><a href="{% url 'faq' %}" class="nav-link">FAQ</a></li>
+            <li class="nav-item">
+              <a class="nav-link"  href="{% url 'login' %}">Login</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- End Navbar-->
+  </header>
+ 
+  <!-- End Header-->

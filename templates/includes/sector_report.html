@@ -1,0 +1,15 @@
+{% for i in swps_final_list %}
+<tr class="border-grey {% cycle 'row1' 'row2'%}">
+            <td class="border-grey" style="text-align:right">{{ forloop.counter}}</td>
+            <td class="border-grey" style="text-align:center">{{ i.sector }}</td>
+            <td class="border-grey" style="text-align:right">{{ i.sector_total }}</td>
+            <td class="border-grey" style="text-align:right">&#8377; {{ i.sector_cost.project_cost }}</td>
+            <td class="border-grey" style="text-align:right">{{ i.sector_percentage }} &percnt;</td>
+            <td class="border-grey" style="text-align:right">{{ i.DMA_total }}</td>
+            <td class="border-grey" style="text-align:right">&#8377; {{ i.DMA_cost.project_cost }}</td>
+            <td class="border-grey" style="text-align:right">{{ i.DMA_percentage }} &percnt;</td>
+            <td class="border-grey" style="text-align:right">{{ i.CTP_total }}</td>
+            <td class="border-grey" style="text-align:right">&#8377; {{ i.CTP_cost.project_cost }}</td>
+            <td class="border-grey" style="text-align:right">{{ i.CTP_percentage }} &percnt;</td>
+        </tr>
+{%endfor%}

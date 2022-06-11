@@ -1,0 +1,99 @@
+{%for row in DMAsector_progress%}
+<div class="modal fade" id="DMA{{row.Sector|cut:" "}}" tabindex="-1" role="dialog" aria-labelledby="DMA{{row.Sector|cut:" "}}" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title" id="DMA{{row.Sector|cut:" "}}Label">KNMT - District Wise Progress - {{row.Sector}}</h5>
+       </div>
+       <div class="modal-body">
+         <table>
+             <thead>
+             <tr>
+                 <th>
+                     <div class="text">
+                       <a href="#">S.No</a>
+                     </div>
+                 </th>
+                 <th>
+                   <div class="text">
+                       <a href="#">Name of the ULB</a>
+                   </div>
+                 </th>
+                 <th>
+                   <div class="text">
+                       <a href="#" style="text-align: center">Project ID</a>
+                   </div>
+                 </th>
+                 <th>
+                   <div class="text">
+                       <a href="#" style="text-align: center">Progress</a>
+                   </div>
+                 </th>
+             </tr>
+             </thead>
+             <tbody>
+             {% for i in row.in_progress %}
+             <tr class="{% cycle 'row1' 'row2' %}">
+               <td> {{ forloop.counter }} </td>
+               <td> {{ i.ULBName }} </td>
+               <td> {{ i.Project_ID }} </td>
+               <td style="text-align: center"> <input type="range" min="0" max="100" value="{{ i.percent }}" class="slider" id="myRange"> {{ row.percentageofworkdone|floatformat:2 }} %</td>
+               </tr>
+             {% endfor %}
+             </tbody>
+         </table>
+       </div>
+       <div class="modal-footer">
+         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+       </div>
+     </div>
+   </div>
+ </div>
+{%endfor%}
+{%for row in DMAsector_progress%}
+<div class="modal fade" id="DMA{{row.Sector|cut:" "}}1" tabindex="-1" role="dialog" aria-labelledby="DMA{{row.Sector|cut:" "}}1" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title" id="DMALabel">KNMT - Works To Be Commenced - {{row.Sector}}</h5>
+       </div>
+       <div class="modal-body">
+         <table>
+             <thead>
+             <tr>
+                <th>
+                     <div class="text">
+                       <a href="#">S. No</a>
+                     </div>
+                 </th>
+                 <th>
+                   <div class="text">
+                       <a href="#">Name of the ULB</a>
+                   </div>
+                 </th>
+                 <th>
+                   <div class="text">
+                       <a href="#" style="text-align: center">Project ID</a>
+                   </div>
+                 </th>
+             </tr>
+             </thead>
+             <tbody>
+             {% for i in row.modal_data %}
+             <tr class="{% cycle 'row1' 'row2' %}">
+               <td> {{ forloop.counter }} </td>
+               <td> {{ i.AgencyName__AgencyName }} </td>
+               <td style="text-align: center"> {{ i.Project_ID }}</td>
+               </tr>
+             {% endfor %}
+             </tbody>
+         </table>
+       </div>
+       <div class="modal-footer">
+         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ {%endfor%}
