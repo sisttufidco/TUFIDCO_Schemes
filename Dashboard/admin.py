@@ -764,6 +764,7 @@ class DashboardAdmin(admin.ModelAdmin):
 
       
         extra_context = {
+            'reportyear':reportyear,
             'CTPsector_progress':CTPsector_progress,
             'DMAsector_progress':DMAsector_progress,
             'sector_progress':sector_progress,
